@@ -14,12 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'full_name']
 
     def get_full_name(self, obj):
-        full_name = obj.first_name
+        full_name = obj.first_name + ' ' + obj.last_name
 
         return full_name
 
 
 class ReservationSerializer(serializers.ModelSerializer):
+
     class Meta:
 
         model = Reservation
@@ -34,6 +35,14 @@ class EmployeeReservationsSerializer(serializers.ModelSerializer):
 
 
 class MeetingRoomSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = MeetingRoom
+        fields = '__all__'
+
+
+class MeetingRoomSerializerWithReservations(serializers.ModelSerializer):
     reservations = serializers.SerializerMethodField()
 
     class Meta:
