@@ -6,16 +6,20 @@ from .models import (MeetingRoom, Reservation,
 
 
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
 
         model = User
-        fields = ['id']
-        read_only_fields = ['username']
+        fields = ['id', 'username', 'email', 'full_name']
+
+    def get_full_name(self, obj):
+        full_name = obj.first_name
+
+        return full_name
 
 
 class ReservationSerializer(serializers.ModelSerializer):
-
     class Meta:
 
         model = Reservation
