@@ -104,7 +104,6 @@ def list_employee_reservations(request, pk):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def createEmployee(request):
     data = request.data
     try:
@@ -116,6 +115,7 @@ def createEmployee(request):
             password=make_password(data['password'])
         )
         serializer = UserSerializer(user, many=False)
+        print(dir(serializer))
         return Response(serializer.data)
     except:
         message = {'detail': 'Employee with this email already exist'}
