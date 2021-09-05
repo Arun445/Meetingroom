@@ -76,9 +76,10 @@ def create_reservation(request):
 @permission_classes([IsAuthenticated])
 def cancel_reservation(request, pk):
     reservation = Reservation.objects.get(pk=pk)
-    reservation.delete()
-
-    return Response(status=status.HTTP_200_OK)
+    if request.user == reservation.employee:
+        reservation.delete()
+        return Response({'detail':'reservation was succesfully canceled'},status=status.HTTP_200_OK)
+    return Response({'detail':'You are not authorized to cancel this reservation'},status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -115,7 +116,6 @@ def createEmployee(request):
             password=make_password(data['password'])
         )
         serializer = UserSerializer(user, many=False)
-        print(dir(serializer))
         return Response(serializer.data)
     except:
         message = {'detail': 'Employee with this email already exist'}
