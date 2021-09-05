@@ -11,6 +11,7 @@ from rest_framework import serializers, status
 from django.contrib.auth.hashers import make_password
 from datetime import datetime
 from .invalid_reservation import delete_invalid_reservations
+from django.utils import timezone
 
 
 @api_view(['GET'])
@@ -24,16 +25,13 @@ def list_meeting_rooms(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_meeting_room_with_reservations(request, pk):
-    query = request.query_params.get('keyword')
-    if query == None:
-        query = ''
-    room = MeetingRoom.objects.get(pk=pk)
-    reservations = room.reservation_set.filter(
-        employee__first_name__icontains=query)
 
+    room = MeetingRoom.objects.get(pk=pk)
+    reservations = room.reservation_set.all()
     delete_invalid_reservations(reservations)
 
-    serializer = MeetingRoomSerializerWithReservations(room, many=False)
+    serializer = MeetingRoomSerializerWithReservations(
+        room, context={'request': request}, many=False)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -61,9 +59,9 @@ def create_reservation(request):
                                                  room=room)
 
         for employee in data['employees']:
-            employeer = User.objects.get(id=employee)
+            employee = User.objects.get(id=employee)
             EmployeeReservations.objects.create(
-                employee=employeer, reservation=reservation)
+                employee=employee, reservation=reservation)
 
         serializer = ReservationSerializer(reservation, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -78,8 +76,8 @@ def cancel_reservation(request, pk):
     reservation = Reservation.objects.get(pk=pk)
     if request.user == reservation.employee:
         reservation.delete()
-        return Response({'detail':'reservation was succesfully canceled'},status=status.HTTP_200_OK)
-    return Response({'detail':'You are not authorized to cancel this reservation'},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'reservation was succesfully canceled'}, status=status.HTTP_200_OK)
+    return Response({'detail': 'You are not authorized to cancel this reservation'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -96,8 +94,10 @@ def list_employees(request):
 @permission_classes([IsAuthenticated])
 def list_employee_reservations(request, pk):
     employee = User.objects.get(pk=pk)
-    employee_reservations = employee.employeereservations_set.all()
-    delete_invalid_reservations(employee_reservations)
+    employee_reservations = employee.employeereservations_set.filter(
+        reservation__reserved_to__gte=timezone.now())
+    all_employee_reservations = employee.employeereservations_set.all()
+    delete_invalid_reservations(all_employee_reservations)
     serializer = EmployeeReservationsSerializer(
         employee_reservations, many=True)
 

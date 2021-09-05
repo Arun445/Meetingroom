@@ -32,6 +32,7 @@ class EmployeeReservationsSerializer(serializers.ModelSerializer):
 
         model = EmployeeReservations
         fields = '__all__'
+    
 
 
 class MeetingRoomSerializer(serializers.ModelSerializer):
@@ -51,6 +52,11 @@ class MeetingRoomSerializerWithReservations(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_reservations(self, obj):
-        reservations = obj.reservation_set.all()
+        query = self.context['request'].query_params.get('keyword')
+        if query == None:
+            query = ''
+        
+
+        reservations = obj.reservation_set.filter(employee__first_name__icontains=query)
         serializer = ReservationSerializer(reservations, many=True)
         return serializer.data
