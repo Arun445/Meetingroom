@@ -32,23 +32,25 @@ class MeetingRoomTestCase(TestCase):
         self.access_token_user_a = response_user_a.data['access']
         self.access_token_user_b = response_user_b.data['access']
         self.user_a = user_a
+        self.user_a_id = user_a.data['id']
+        self.user_b_id = user_a.data['id']
 
         response = self.client.post(
-            self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
-        self.assertEqual(response.status_code, 201)
+            self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
+
+        self.room_a_id = response.data['id']
 
         response = self.client.post(
             self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}')
-        self.assertEqual(response.status_code, 201)
 
     def test_authorized_employee_list_all_rooms(self):
         response = self.client.get(
-            self.get_all_rooms_url,  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            self.get_all_rooms_url,  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(len(response.data), 2)
 
-    def test_authorized_employee_get_room(self):
+    def test_authorized_employee_view_room(self):
         response = self.client.get(
-            '/api/rooms/1/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            f'/api/rooms/{self.room_a_id}/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
     def test_authorized_employee_reservation_create(self):
@@ -57,9 +59,9 @@ class MeetingRoomTestCase(TestCase):
                 "title": "reservation1",
                 "reserved_from": "2021-09-02T14:07:09",
                 "reserved_to": "2021-09-03T14:07:10",
-                "room": 1,
-                "employees": [1, 2]
-            }, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+                "room": self.room_a_id,
+                "employees": [self.user_a_id, self.user_b_id]
+            }, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
 
@@ -69,8 +71,8 @@ class MeetingRoomTestCase(TestCase):
                 "title": "reservation1",
                 "reserved_from": "2021-09-02T14:07:09",
                 "reserved_to": "2021-09-03T14:07:10",
-                "room": 1,
-                "employees": [1, 2]
+                "room": self.room_a_id,
+                "employees": [self.user_a_id, self.user_b_id]
             })
 
         self.assertEqual(response.status_code, 401)
@@ -98,68 +100,73 @@ class ReservationTestCase(TestCase):
 
         response_user_a = self.client.post(self.login_url, data_a, follow=True)
         response_user_b = self.client.post(self.login_url, data_b, follow=True)
+
         self.access_token_user_a = response_user_a.data['access']
         self.access_token_user_b = response_user_b.data['access']
         self.user_a = user_a
+        self.user_a_id = user_a.data['id']
 
         response = self.client.post(
-            self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
-        self.assertEqual(response.status_code, 201)
+            self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
-        response = self.client.post(
+        self.room_id = response.data['id']
+
+        reservation = self.client.post(
             self.create_reservation_url, {
                 "title": "reservation1",
                 "reserved_from": "2021-09-02T14:07:09",
                 "reserved_to": "2022-09-03T14:07:10",
-                "room": 1,
-                "employees": [1, 2]
+                "room": self.room_id,
+                "employees": [user_a.data['id'], user_b.data['id']]
             }, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
-        response = self.client.post(
+        self.client.post(
             self.create_reservation_url, {
                 "title": "reservation2",
                 "reserved_from": "2021-09-02T14:07:09",
                 "reserved_to": "2021-09-03T14:07:10",
-                "room": 1,
-                "employees": [1, 2]
+                "room": self.room_id,
+                "employees": [user_a.data['id'], user_b.data['id']]
             }, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
+
+        self.reservation_id = reservation.data['id']
 
     def test_authorized_employee_get_meeting_room_reservations(self):
         response = self.client.get(
-            '/api/rooms/1/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            f'/api/rooms/{self.room_id}/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
         reservations = response.data['reservations']
         self.assertEqual(len(reservations), 1)
 
     def test_authorized_employee_get_room_reservations_filtered_by_name(self):
         response = self.client.get(
-            '/api/rooms/1/?keyword=tom',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            f'/api/rooms/{self.room_id}/?keyword=tom',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
         filtered_reservations = response.data['reservations']
         self.assertEqual(len(filtered_reservations), 0)
 
     def test_authorized_employee_list_all_employees(self):
         response = self.client.get(
-            '/api/users/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            '/api/users/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
         self.assertEqual(len(response.data), 2)
 
     def test_authorized_employee_list_all_employee_reservations(self):
         response = self.client.get(
-            '/api/users/1/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            f'/api/users/{self.user_a_id}/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(len(response.data), 1)
 
     def test_authorized_employee_not_creator_reservation_cancel(self):
         response = self.client.delete(
-            '/api/reservations/delete/1/', HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}')
+            f'/api/reservations/delete/{self.reservation_id}/', HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}')
         self.assertEqual(response.status_code, 400)
 
     def test_not_authorized_employee_reservation_cancel(self):
         response = self.client.delete(
-            '/api/reservations/delete/1/')
+            f'/api/reservations/delete/{self.reservation_id}/')
         self.assertEqual(response.status_code, 401)
 
     def test_authorized_employee_reservation_cancel(self):
         response = self.client.delete(
-            '/api/reservations/delete/1/', HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            f'/api/reservations/delete/{self.reservation_id}/', HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(response.status_code, 200)

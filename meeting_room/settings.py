@@ -88,7 +88,18 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'MeetingRoom',
+        'USER': 'postgres',
+        'PASSWORD': 'bazingeris1',
+        'HOST': 'database-3.cjiw8hi93vqh.eu-central-1.rds.amazonaws.com',
+        'PORT': 5432
+    }
+}
+'''
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -117,17 +128,22 @@ LOGGING = {
             'backupCount': 5,
             'maxBytes': 10485760,
         },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        }
     },
     'loggers': {
 
         '': {
-            'handlers': ['file'],
+            'handlers': ['file', 'console'],
             'level': 'INFO',
 
         },
         'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
             'propagate': False
         },
         'django.server': {

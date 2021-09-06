@@ -104,12 +104,12 @@ def list_employees(request):
 @permission_classes([IsAuthenticated])
 def list_employee_reservations(request, pk):
     employee = User.objects.get(pk=pk)
-    employee_reservations = employee.employeereservations_set.filter(
+    filtered_employee_reservations = employee.employeereservations_set.filter(
         reservation__reserved_to__gte=timezone.now())
     all_employee_reservations = employee.employeereservations_set.all()
     delete_invalid_reservations(all_employee_reservations)
     serializer = EmployeeReservationsSerializer(
-        employee_reservations, many=True)
+        filtered_employee_reservations, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

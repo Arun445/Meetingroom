@@ -44,13 +44,13 @@ class EmployeeTestCase(TestCase):
 
     def test_user_create_room(self):
         response = self.client.post(
-            self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
         response = self.client.post(
-            self.create_room_url, {"name": "ROOM2"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}')
+            self.create_room_url, {"name": "ROOM2"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}', content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
         response = self.client.get(
-            self.get_all_rooms_url,  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}')
+            self.get_all_rooms_url,  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(len(response.data), 2)

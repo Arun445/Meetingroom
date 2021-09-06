@@ -27,10 +27,20 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 
 class EmployeeReservationsSerializer(serializers.ModelSerializer):
+    reservation_from_date = serializers.SerializerMethodField()
+    reservation_to_date = serializers.SerializerMethodField()
+
     class Meta:
 
         model = EmployeeReservations
-        fields = '__all__'
+        fields = ['employee', 'reservation',
+                  'reservation_from_date', 'reservation_to_date']
+
+    def get_reservation_from_date(self, obj):
+        return obj.reservation.reserved_from
+
+    def get_reservation_to_date(self, obj):
+        return obj.reservation.reserved_to
 
 
 class MeetingRoomSerializer(serializers.ModelSerializer):
