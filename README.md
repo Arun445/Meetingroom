@@ -24,6 +24,7 @@ All the API urls:
 <h3>Authentication.</h3>
 <ul>
 <li>Register an employee using '/api/users/register/', this api takes in first_name, last_name, email, password.</li>
+ <img src='readme_images/Image4.png'>
 <li>Login with email and password in '/api/login/'. Api will output an access token and a refresh token. </li>
 <li>Using that access token you can access other apis. Usage example {"Authorization" : "Bearer access:token"}</li>
 </ul>
@@ -40,6 +41,7 @@ All the API urls:
 <li>Then check all the available employees using '/api/users/', which lists all the emoplyees. </li>
 <li>Before inviting employees to the room reservation, check if they have reservations on that time using '/api/users/str:pk/', this api takes in the id of the employee and outputs all employees reservation times.</li>
 <li>Create a reservation using '/api/reservations/create/', this api takes in a title, reserved_from, reserved_to, room id where you want to create the reservation, and employees the ones you want to invite to the room (as a list of ids).</li>
+<img src='readme_images/Image3.png'>
 <li>Invited employees will be reserved for that time automatically. </li>
 <h3>Cancel a reservation</h3>
 <li>If you are a reservations author you can easily cancel a reservation using '/api/reservations/delete/str:pk/', this api takes in the reservations id.</li>
