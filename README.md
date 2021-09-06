@@ -28,14 +28,15 @@ All the API urls:
 <li>Using that access token you can access other apis. Usage example {"Authorization" : "Bearer access:token"}</li>
 </ul>
 <h3>Using further apis, you must pass in the access token as authorization</h3>
-<img>
+<img src='readme_images/Image1.png'>
 <h3>Create a room</h3>
 <ul>
 <li>Create a room using '/api/rooms/create/', this api takes in name as an argument  </li>
+ <img src='readme_images/Image2.png'>
 </ul>
 <h3>Create a reservation</h3>
 <li>First check the meeting room for reservation availabilities using '/api/rooms/str:pk/', this api takes in the id of the room.</li>
-<li>You can also filter the meeting room reservations by specific employee names./li>
+<li>You can also filter the meeting room reservations by specific employee names using '/api/rooms/str:pk/?keyword=tom'.</li>
 <li>Then check all the available employees using '/api/users/', which lists all the emoplyees. </li>
 <li>Before inviting employees to the room reservation, check if they have reservations on that time using '/api/users/str:pk/', this api takes in the id of the employee and outputs all employees reservation times.</li>
 <li>Create a reservation using '/api/reservations/create/', this api takes in a title, reserved_from, reserved_to, room id where you want to create the reservation, and employees the ones you want to invite to the room (as a list of ids).</li>
