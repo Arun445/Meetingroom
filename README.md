@@ -27,12 +27,14 @@ All the API urls:
  <img src='readme_images/Image4.png'>
 <li>Login with email and password in '/api/login/'. Api will output an access token and a refresh token. </li>
 <li>Using that access token you can access other apis. Usage example {"Authorization" : "Bearer access:token"}</li>
+<li>If the access token life time has ended, use a refresh token to get a new access token using '/api/token/refresh/' taking the refresh token as an argument</li>
+
 </ul>
 <h3>Using further apis, you must pass in the access token as authorization</h3>
 <img src='readme_images/Image1.png'>
 <h3>Create a room</h3>
 <ul>
-<li>Create a room using '/api/rooms/create/', this api takes in name as an argument  </li>
+<li>Create a room using '/api/rooms/create/', this api takes in name as an argument.</li>
  <img src='readme_images/Image2.png'>
 </ul>
 <h3>Create a reservation</h3>
