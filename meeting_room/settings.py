@@ -92,8 +92,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'MeetingRoom',
-        'USER': os.environ.get('RDS_POSTGRESQL_USER'),
-        'PASSWORD': os.environ.get('RDS_MEETING_ROOM_PASS'),
+        'USER': os.environ.get('RDS_MEETING_ROOM_USER'),
+        'PASSWORD': os.environ.get('RDS_POSTGRESQL_PASS'),
         'HOST': 'database-3.cjiw8hi93vqh.eu-central-1.rds.amazonaws.com',
         'PORT': 5432
     }
