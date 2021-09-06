@@ -1,17 +1,18 @@
-from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .serializers import (EmployeeReservationsSerializer, MeetingRoomSerializer, ReservationSerializer,
                           EmployeeReservations, UserSerializer, MeetingRoomSerializerWithReservations)
 from .models import (MeetingRoom, Reservation,
                      EmployeeReservations)
-from rest_framework import serializers, status
+from rest_framework import status
 from django.contrib.auth.hashers import make_password
-from datetime import datetime
+
 from .invalid_reservation import delete_invalid_reservations
 from django.utils import timezone
+import logging
+logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
@@ -19,20 +20,20 @@ from django.utils import timezone
 def list_meeting_rooms(request):
     rooms = MeetingRoom.objects.all()
     serializer = MeetingRoomSerializer(rooms, many=True)
+    logger.info(f"{request.user.get_full_name()} checks all rooms")
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_meeting_room_with_reservations(request, pk):
-
     room = MeetingRoom.objects.get(pk=pk)
     reservations = room.reservation_set.all()
     delete_invalid_reservations(reservations)
-
     serializer = MeetingRoomSerializerWithReservations(
         room, context={'request': request}, many=False)
-
+    logger.info(
+        f"{request.user.get_full_name()} checks room {room.name} reservations")
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -43,7 +44,10 @@ def create_meeting_room(request):
     serializer = MeetingRoomSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
+        logger.info(f"{request.user.get_full_name()} created a new room")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    logger.warning(
+        f"{request.user.get_full_name()} was not successfull creating a room")
     message = {'detail': 'There was a problem creating this meeting room'}
     return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
@@ -64,8 +68,12 @@ def create_reservation(request):
                 employee=employee, reservation=reservation)
 
         serializer = ReservationSerializer(reservation, many=False)
+        logger.info(
+            f"{request.user.get_full_name()} created a new reservation")
         return Response(serializer.data, status=status.HTTP_200_OK)
     except:
+        logger.warning(
+            f"{request.user.get_full_name()} was not successfull creating a reservation")
         message = {'detail': 'Reservation creation failed'}
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
@@ -76,7 +84,10 @@ def cancel_reservation(request, pk):
     reservation = Reservation.objects.get(pk=pk)
     if request.user == reservation.employee:
         reservation.delete()
+        logger.info(f"{request.user.get_full_name()} canceled a reservation")
         return Response({'detail': 'reservation was succesfully canceled'}, status=status.HTTP_200_OK)
+    logger.warning(
+        f"{request.user.get_full_name()} was not authorized to cancel ")
     return Response({'detail': 'You are not authorized to cancel this reservation'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -86,7 +97,6 @@ def list_employees(request):
 
     employees = User.objects.all()
     serializer = UserSerializer(employees, many=True)
-
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -100,7 +110,6 @@ def list_employee_reservations(request, pk):
     delete_invalid_reservations(all_employee_reservations)
     serializer = EmployeeReservationsSerializer(
         employee_reservations, many=True)
-
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -116,6 +125,8 @@ def createEmployee(request):
             password=make_password(data['password'])
         )
         serializer = UserSerializer(user, many=False)
+        logger.info(
+            f'new employee {user.first_name} {user.last_name} was created')
         return Response(serializer.data)
     except:
         message = {'detail': 'Employee with this email already exist'}

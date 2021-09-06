@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-
 from .models import (MeetingRoom, Reservation,
                      EmployeeReservations)
 
@@ -32,7 +31,6 @@ class EmployeeReservationsSerializer(serializers.ModelSerializer):
 
         model = EmployeeReservations
         fields = '__all__'
-    
 
 
 class MeetingRoomSerializer(serializers.ModelSerializer):
@@ -55,8 +53,8 @@ class MeetingRoomSerializerWithReservations(serializers.ModelSerializer):
         query = self.context['request'].query_params.get('keyword')
         if query == None:
             query = ''
-        
 
-        reservations = obj.reservation_set.filter(employee__first_name__icontains=query)
+        reservations = obj.reservation_set.filter(
+            employee__first_name__icontains=query)
         serializer = ReservationSerializer(reservations, many=True)
         return serializer.data

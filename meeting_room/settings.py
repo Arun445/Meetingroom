@@ -105,6 +105,41 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': './logs/info_logs.log',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+
+        '': {
+            'handlers': ['file'],
+            'level': 'INFO',
+
+        },
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+        'django.server': {
+            'propagate': True
+
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{'
+        }
+    },
+}
 
 LANGUAGE_CODE = 'en-us'
 
