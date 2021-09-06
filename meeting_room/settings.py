@@ -111,9 +111,11 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': './logs/info_logs.log',
-            'formatter': 'simple'
+            'formatter': 'simple',
+            'backupCount': 5,
+            'maxBytes': 10485760,
         },
     },
     'loggers': {
