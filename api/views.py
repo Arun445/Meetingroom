@@ -27,6 +27,7 @@ def list_meeting_rooms(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_meeting_room_with_reservations(request, pk):
+    # lists a specific meeting room and deletes all the invalid reservations
     room = MeetingRoom.objects.get(pk=pk)
     reservations = room.reservation_set.all()
     delete_invalid_reservations(reservations)
@@ -61,7 +62,7 @@ def create_reservation(request):
         reservation = Reservation.objects.create(title=data['title'], reserved_from=data['reserved_from'],
                                                  reserved_to=data['reserved_to'], employee=request.user,
                                                  room=room)
-
+        # Creates the reservations to all the employees specified in the reservation
         for employee in data['employees']:
             employee = User.objects.get(id=employee)
             EmployeeReservations.objects.create(
@@ -103,6 +104,7 @@ def list_employees(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_employee_reservations(request, pk):
+    # lists a specific employee, its reservations, from and to dates, and deletes the invalid reservations
     employee = User.objects.get(pk=pk)
     filtered_employee_reservations = employee.employeereservations_set.filter(
         reservation__reserved_to__gte=timezone.now())

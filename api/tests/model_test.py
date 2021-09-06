@@ -13,6 +13,7 @@ class EmployeeTestCase(TestCase):
     login_url = "/api/login/"
 
     def setUp(self):
+        # Set up creating two users
         user_a = self.client.post(self.create_employee_url, {"first_name": "John", "last_name": "Doe",
                                   "email": "johndoe@email.com", "password": "password123"}, follow=True)
         user_b = self.client.post(self.create_employee_url, {"first_name": "Tom", "last_name": "Moe",
@@ -31,18 +32,22 @@ class EmployeeTestCase(TestCase):
         self.user_a = user_a
 
     def test_user_exists(self):
+        # test if users in setup were created
         user_count = User.objects.all().count()
         self.assertEqual(user_count, 2)
 
     def test_user_full_name(self):
+        # test if user has a full_name serialized data
         full_name = self.user_a.data['full_name']
         self.assertEqual(full_name, 'John Doe')
 
     def test_username(self):
+        # test if users username is the same as the email
         full_name = self.user_a.data['username']
         self.assertEqual(full_name, self.user_a.data['email'])
 
     def test_user_create_room(self):
+        # test if user can create a meeting room
         response = self.client.post(
             self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(response.status_code, 201)

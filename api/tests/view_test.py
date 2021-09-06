@@ -16,6 +16,7 @@ class MeetingRoomTestCase(TestCase):
     login_url = "/api/login/"
 
     def setUp(self):
+        # Sets up the testing ground by creating two users and two meeting rooms
         user_a = self.client.post(self.create_employee_url, {"first_name": "John", "last_name": "Doe",
                                   "email": "johndoe@email.com", "password": "password123"}, follow=True)
         user_b = self.client.post(self.create_employee_url, {"first_name": "Tom", "last_name": "Moe",
@@ -44,16 +45,19 @@ class MeetingRoomTestCase(TestCase):
             self.create_room_url, {"name": "ROOM1"}, HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}')
 
     def test_authorized_employee_list_all_rooms(self):
+        # test if an authorized employee can get a list of all rooms
         response = self.client.get(
             self.get_all_rooms_url,  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(len(response.data), 2)
 
     def test_authorized_employee_view_room(self):
+        # test if an authorized employee can get a specific room with all its reservations
         response = self.client.get(
             f'/api/rooms/{self.room_a_id}/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
     def test_authorized_employee_reservation_create(self):
+        # test if an authorized employee can create a reservation in a room
         response = self.client.post(
             self.create_reservation_url, {
                 "title": "reservation1",
@@ -66,6 +70,7 @@ class MeetingRoomTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_not_authorized_employee_reservation_create(self):
+        # test if a not authorized employee can't create a reservation
         response = self.client.post(
             self.create_reservation_url, {
                 "title": "reservation1",
@@ -86,7 +91,7 @@ class ReservationTestCase(TestCase):
     login_url = "/api/login/"
 
     def setUp(self):
-
+        # Sets up the testing ground by creating two users, two meeting rooms and two reservations
         user_a = self.client.post(self.create_employee_url, {"first_name": "John", "last_name": "Doe",
                                                              "email": "johndoe@email.com", "password": "password123"}, follow=True)
         user_b = self.client.post(self.create_employee_url, {"first_name": "Tom", "last_name": "Moe",
@@ -132,6 +137,7 @@ class ReservationTestCase(TestCase):
         self.reservation_id = reservation.data['id']
 
     def test_authorized_employee_get_meeting_room_reservations(self):
+       # test if an authorized employee can get a specific room with all its reservations and also not show invalid reservations
         response = self.client.get(
             f'/api/rooms/{self.room_id}/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
@@ -139,6 +145,7 @@ class ReservationTestCase(TestCase):
         self.assertEqual(len(reservations), 1)
 
     def test_authorized_employee_get_room_reservations_filtered_by_name(self):
+        # test if an authorized employee can get a specific room and filter it by an employee
         response = self.client.get(
             f'/api/rooms/{self.room_id}/?keyword=tom',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
@@ -146,27 +153,32 @@ class ReservationTestCase(TestCase):
         self.assertEqual(len(filtered_reservations), 0)
 
     def test_authorized_employee_list_all_employees(self):
+        # test if an authorized employee can get a list of all the employees
         response = self.client.get(
             '/api/users/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
 
         self.assertEqual(len(response.data), 2)
 
     def test_authorized_employee_list_all_employee_reservations(self):
+        # test if an authorized employee can check a emplyees reservations and show only the valid ones
         response = self.client.get(
             f'/api/users/{self.user_a_id}/',  HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(len(response.data), 1)
 
     def test_authorized_employee_not_creator_reservation_cancel(self):
+        # test if an authorized employee but not the author of the reservation, can't cancel a reservation
         response = self.client.delete(
             f'/api/reservations/delete/{self.reservation_id}/', HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_b}')
         self.assertEqual(response.status_code, 400)
 
     def test_not_authorized_employee_reservation_cancel(self):
+        # test if a not authorized employee can't cancel a reservation
         response = self.client.delete(
             f'/api/reservations/delete/{self.reservation_id}/')
         self.assertEqual(response.status_code, 401)
 
     def test_authorized_employee_reservation_cancel(self):
+        # test if an authorized employee and the author of this reservation can cancel it
         response = self.client.delete(
             f'/api/reservations/delete/{self.reservation_id}/', HTTP_AUTHORIZATION=f'Bearer {self.access_token_user_a}', content_type='application/json')
         self.assertEqual(response.status_code, 200)
