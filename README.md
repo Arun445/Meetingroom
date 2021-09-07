@@ -41,7 +41,9 @@ All the API urls:
 <li>First check the meeting room for reservation availabilities using '/api/rooms/str:pk/', this api takes in the id of the room.</li>
 <li>You can also filter the meeting room reservations by specific employee using '/api/rooms/str:pk/?keyword=tom'.</li>
 <li>Then check all the available employees using '/api/users/', which lists all the emoplyees. </li>
+<img src='readme_images/Image5.png'>
 <li>Before inviting employees to the room reservation, check if they have reservations on that time using '/api/users/str:pk/', this api takes in the id of the employee and outputs all employees reservation times.</li>
+<img src='readme_images/Image6.png'>
 <li>Create a reservation using '/api/reservations/create/', this api takes in a title, reserved_from, reserved_to, room id where you want to create the reservation, and employees the ones you want to invite to the room (as a list of ids).</li>
 <img src='readme_images/Image3.png'>
 <li>Invited employees will be reserved for that time automatically. </li>
