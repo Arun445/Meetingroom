@@ -3,7 +3,7 @@
 <h3>Information:</h3>
 <li>Postresql database is used and pushed to the cloud using AWS RDS.</li>
 <li>JWT is used for authorization of employees. </li>
-<li>API built using django and django rest framework and pushed to docker - https://hub.docker.com/r/arun445/meeting_room </li>
+<li>API built using django and django rest framework and pushed to docker </li>
 <li>Testing and logging implemented. </li>
 
 
